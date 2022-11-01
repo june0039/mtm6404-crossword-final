@@ -1,2 +1,4 @@
-# mtm6404-crossword
-This repository contains the starter files for the Crossword project. 
+# Crossword
+
+## Objective
+Use React, local storage, and the starter files to create a Crossword puzzle game.
