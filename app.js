@@ -36,7 +36,6 @@ function Clue ({ clue, word }) {
 
 function Response ({ message }) {
   const className = `alert alert-info ${message ? 'visible' : 'invisible'}`
-  
   return (
     <div className="row mb-5">
       <div className="col">
@@ -46,24 +45,35 @@ function Response ({ message }) {
   )
 }
 
-function Form () {
-  
+function Form ({ onGuess }) {
+  const [guess, setGuess] = React.useState('')
+
+  function changeHandler (e) {
+    setGuess(e.target.value)
+  }
+
+  function submitHandler (e) {
+    e.preventDefault()
+    onGuess(guess)
+    setGuess('')
+  }
+
   return (
     <div className="row mb-5">
       <div className="col-6 offset-3">
-        <form className="form">
-          <input type="text" className="form-control text-uppercase" />
+        <form className="form" onSubmit={submitHandler}>
+          <input type="text" value={guess} onChange={changeHandler} className="form-control text-uppercase" />
         </form>
       </div>
     </div>
   )
 }
 
-function Button ({ text, variant }) {
+function Button ({ text, variant, onButtonClick }) {
   const className = `btn btn-${variant}`
 
   function clickHandler () {
-
+    onButtonClick()
   }
 
   return (
@@ -75,20 +85,107 @@ function Button ({ text, variant }) {
   )
 }
 
-function App () { 
-  const puzzles = dataset
-  const puzzle = puzzles[0]
-  const score = 2 
-  const message = 'First word.'
+function Skip ({ onSkip }) {
 
+  function clickHandler () {
+    onSkip()
+  }
+
+  return (
+    <div className="row">
+      <div className="col d-flex justify-content-center">
+        <button type="button" className="btn btn-danger" onClick={clickHandler}>Skip</button>
+      </div>
+    </div>
+  )
+}
+
+function Play () {
+
+  function clickHandler () {
+    console.log('Play Again')
+  }
+
+  return (
+    <div className="row">
+      <div className="col d-flex justify-content-center">
+        <button type="button" className="btn btn-primary" onClick={clickHandler}>Play Again</button>
+      </div>
+    </div>
+  )
+}
+
+function App () {
+  const [puzzles, setPuzzles] = useLocalStorage('puzzles', dataset)
+  const [score, setScore] = useLocalStorage('score', 0)
+  const [message, setMessage] = useLocalStorage('message', '')
+  const [puzzle, setPuzzle] = useLocalStorage('puzzle', puzzles[0])
+  const [active, setActive] = useLocalStorage('active', true)
+
+  function onGuessHandler (guess) {
+    if (guess.toUpperCase() === puzzle.word) {
+      setScore(prevScore => prevScore + 1)
+
+      if (puzzles.length > 1) {
+        setMessage('Correct. Next puzzle.')
+        setPuzzles(puzzles.slice(1))
+      } else {
+        gameOver()
+      }
+    } else {
+      setMessage('Wrong. Try again.')
+    }
+  }
+
+  function onSkipHandler () {
+    if (puzzles.length > 1) {
+      setMessage('Skipped. Next puzzle.')
+      setPuzzles(puzzles.slice(1))
+    } else {
+      gameOver()
+    }
+  }
+
+  function gameOver () {
+    setMessage(`No more puzzles. Your final score is ${score}.`)
+    setActive(false)
+  }
+
+  function onPlayHandler () {
+    setMessage('')
+    setActive(true)
+    setScore(0)
+    setPuzzles(dataset)
+  }
+
+  React.useEffect(() => {
+    setPuzzle(puzzles[0])
+  }, [JSON.stringify(puzzles)])
+
+  React.useEffect(() => {
+    localStorage.setItem('crossword', JSON.stringify({
+      active,
+      puzzles,
+      puzzle,
+      score,
+      message
+    }))
+  })
+
+  function useLocalStorage (key, defaultValue) {
+    const ls = JSON.parse(localStorage.getItem('crossword'))
+
+    return React.useState(ls ? ls[key] : defaultValue) 
+  }
+  
   return (
     <div className="container p-5">
       <Score score={score} />
-      <Clue clue={puzzle.clue} word={puzzle.word} />
+      {active && <Clue clue={puzzle.clue} word={puzzle.word} />}
       <Response message={message} />
-      <Form />
-      <Button text="Skip" variant="danger" />
-      <Button text="Play Again?" variant="primary" />
+      {active && <Form onGuess={onGuessHandler} />}
+      {active && <Button text="Skip" variant="danger" onButtonClick={onSkipHandler} />}
+      {!active && <Button text="Play Again?" variant="primary" onButtonClick={onPlayHandler} />}
     </div>
   )
 }
