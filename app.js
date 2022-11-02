@@ -1,16 +1,27 @@
+//State variables change
+//score
+//puzzle
+//puzzles
+//message
+//active
+//
+//Static variables stay the same
+
+
+
 const dataset = [
   { word: 'AFTER', clue: 'Behind in place' },
   { word: 'BADGES', clue: 'Boy Scouts earn them' },
   { word: 'COLA', clue: 'Soft drink' },
-  { word: 'DULL', clue: 'Blunt'},
-  { word: 'EGO', clue: 'It may be bruised or inflated'},
-  { word: 'FADE', clue: 'Grow dimmer'},
-  { word: 'GATE', clue: 'Stadium entrance'},
-  { word: 'HERO', clue: 'Medal of Honor recipient'},
+  { word: 'DULL', clue: 'Blunt' },
+  { word: 'EGO', clue: 'It may be bruised or inflated' },
+  { word: 'FADE', clue: 'Grow dimmer' },
+  { word: 'GATE', clue: 'Stadium entrance' },
+  { word: 'HERO', clue: 'Medal of Honor recipient' },
   { word: 'ILLUME', clue: 'Shed light on' }
 ]
 
-function Score ({ score }) {
+function Score({ score }) {
   return (
     <div className="row mb-5">
       <div className="col">
@@ -23,7 +34,7 @@ function Score ({ score }) {
   )
 }
 
-function Clue ({ clue, word }) {
+function Clue({ clue, word }) {
   return (
     <div className="row mb-5">
       <div className="col text-center">
@@ -34,25 +45,25 @@ function Clue ({ clue, word }) {
   )
 }
 
-function Response ({ message }) {
+function Response({ message }) {
   const className = `alert alert-info ${message ? 'visible' : 'invisible'}`
   return (
     <div className="row mb-5">
       <div className="col">
-        <div className={className}>{message || '&nbsp;' }</div>
+        <div className={className}>{message || '&nbsp;'}</div>
       </div>
     </div>
   )
 }
 
-function Form ({ onGuess }) {
+function Form({ onGuess }) {
   const [guess, setGuess] = React.useState('')
 
-  function changeHandler (e) {
+  function changeHandler(e) {
     setGuess(e.target.value)
   }
 
-  function submitHandler (e) {
+  function submitHandler(e) {
     e.preventDefault()
     onGuess(guess)
     setGuess('')
@@ -69,10 +80,10 @@ function Form ({ onGuess }) {
   )
 }
 
-function Button ({ text, variant, onButtonClick }) {
+function Button({ text, variant, onButtonClick }) {
   const className = `btn btn-${variant}`
 
-  function clickHandler () {
+  function clickHandler() {
     onButtonClick()
   }
 
@@ -85,9 +96,9 @@ function Button ({ text, variant, onButtonClick }) {
   )
 }
 
-function Skip ({ onSkip }) {
+function Skip({ onSkip }) {
 
-  function clickHandler () {
+  function clickHandler() {
     onSkip()
   }
 
@@ -100,9 +111,9 @@ function Skip ({ onSkip }) {
   )
 }
 
-function Play () {
+function Play() {
 
-  function clickHandler () {
+  function clickHandler() {
     console.log('Play Again')
   }
 
@@ -115,14 +126,14 @@ function Play () {
   )
 }
 
-function App () {
+function App() {
   const [puzzles, setPuzzles] = useLocalStorage('puzzles', dataset)
   const [score, setScore] = useLocalStorage('score', 0)
   const [message, setMessage] = useLocalStorage('message', '')
   const [puzzle, setPuzzle] = useLocalStorage('puzzle', puzzles[0])
   const [active, setActive] = useLocalStorage('active', true)
 
-  function onGuessHandler (guess) {
+  function onGuessHandler(guess) {
     if (guess.toUpperCase() === puzzle.word) {
       setScore(prevScore => prevScore + 1)
 
@@ -137,7 +148,7 @@ function App () {
     }
   }
 
-  function onSkipHandler () {
+  function onSkipHandler() {
     if (puzzles.length > 1) {
       setMessage('Skipped. Next puzzle.')
       setPuzzles(puzzles.slice(1))
@@ -146,12 +157,12 @@ function App () {
     }
   }
 
-  function gameOver () {
+  function gameOver() {
     setMessage(`No more puzzles. Your final score is ${score}.`)
     setActive(false)
   }
 
-  function onPlayHandler () {
+  function onPlayHandler() {
     setMessage('')
     setActive(true)
     setScore(0)
@@ -172,12 +183,12 @@ function App () {
     }))
   })
 
-  function useLocalStorage (key, defaultValue) {
+  function useLocalStorage(key, defaultValue) {
     const ls = JSON.parse(localStorage.getItem('crossword'))
 
-    return React.useState(ls ? ls[key] : defaultValue) 
+    return React.useState(ls ? ls[key] : defaultValue)
   }
-  
+
   return (
     <div className="container p-5">
       <Score score={score} />
